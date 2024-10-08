@@ -1,0 +1,17 @@
+{% extends "spa/base.html" %} 
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Denuncias Pendientes</h2>
+    {% for denuncia in denuncias %}
+        <div class="alert alert-warning mb-3"> <!-- Usa un alert para resaltar cada denuncia -->
+            <p><strong>Denuncia sobre el post:</strong> {{ denuncia.post.titulo }}</p>
+            <p><strong>Motivo:</strong> {{ denuncia.motivo }}</p>
+            <a href="{% url 'resolver-denuncia' denuncia.pk %}" class="btn btn-success">Resolver</a>
+        </div>
+    {% empty %}
+        <div class="alert alert-info">No hay denuncias pendientes.</div>
+    {% endfor %}
+</div>
+{% endblock %}
+

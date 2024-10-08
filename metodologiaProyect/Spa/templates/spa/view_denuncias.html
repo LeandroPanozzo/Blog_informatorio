@@ -1,0 +1,32 @@
+{% extends "spa/base.html" %}
+
+{% block content %}
+    <h2>Denuncias de Posts</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Post</th>
+                <th>Denunciante</th>
+                <th>Motivo</th>
+                <th>Fecha de Denuncia</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for denuncia in denuncias %}
+                <tr>
+                    <td>{{ denuncia.post.titulo }}</td>
+                    <td>{{ denuncia.denunciante.username }}</td>
+                    <td>{{ denuncia.motivo }}</td>
+                    <td>{{ denuncia.fecha_denuncia }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'post-delete' denuncia.post.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm" type="submit">Eliminar Post</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

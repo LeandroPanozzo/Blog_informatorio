@@ -1,0 +1,218 @@
+{% extends "spa/base.html" %}
+
+{% block content %}
+<style>
+    .comment {
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        font-family: Arial, sans-serif;
+        color: #333;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+    }
+    .comment-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    .comment-header img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .comment-header strong {
+        margin-right: 5px;
+        color: #0079d3;
+    }
+    .comment-header small {
+        color: #888;
+    }
+    .comment-content {
+        margin-bottom: 10px;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    .replies {
+        margin-left: 30px;
+        border-left: 2px solid #ddd;
+        padding-left: 15px;
+    }
+    .reply {
+        margin-top: 10px;
+    }
+    .reply-button {
+        background-color: #f6f7f8;
+        border: none;
+        color: #0079d3;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 5px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .reply-button:hover {
+        text-decoration: underline;
+    }
+    .reply-form textarea {
+        width: 100%;
+        height: 80px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        font-size: 14px;
+        resize: none;
+    }
+    .reply-form button {
+        background-color: #0079d3;
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .reply-form button:hover {
+        background-color: #0056a3;
+    }
+    h3 {
+        margin-top: 30px;
+        color: #333;
+    }
+    .comment-form textarea {
+        width: 100%;
+        height: 80px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        font-size: 14px;
+        resize: none;
+    }
+    .comment-form button {
+        background-color: #0079d3;
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .comment-form button:hover {
+        background-color: #0056a3;
+    }
+    .comment-form {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ object.autor.profile.image.url }}"> 
+    <div class="media-body"> 
+        <div class="article-metadata">
+            <a class="mr-2" href="{% url 'user-post' object.autor.username %}">{{ object.autor }}</a> 
+            <small class="text-muted">{{ object.fecha_posteo }}</small>
+            
+            {% if object.autor == user or user.is_superuser %}
+                <div>
+                    {% if object.autor == user %}
+                        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Actualizar</a>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <form method="POST" action="{% url 'post-delete' object.id %}" style="display:inline;">  
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm mt-1 mb-1" type="submit">Eliminar</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <form method="POST" action="{% url 'crear-denuncia' object.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-warning btn-sm mt-1 mb-1" type="submit">Denunciar</button>
+                </form>
+            {% endif %}
+        </div>
+        <h2 class="article-title">{{ object.titulo }}</h2>
+        <p class="article-content">{{ object.contenido }}</p>
+        {% if object.imagen %}
+            <img class="img-fluid" src="{{ object.imagen.url }}" alt="{{ object.titulo }}"/>
+        {% endif %}
+    </div>
+</article>
+
+<div class="comment-form">
+    <h3>Agregar un Comentario</h3>
+    <form method="POST" action="{% url 'add-comment' object.id %}">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" class="btn btn-primary">Publicar</button>
+    </form>
+</div>
+
+<h2>Comentarios</h2>
+<div class="comment-section">
+    {% for comment in comments %}
+        {% if not comment.parent_comment %}
+            <div class="comment">
+                <div class="comment-header">
+                    <img src="{{ comment.author.profile.image.url }}" alt="Avatar">
+                    <strong>{{ comment.author.username }}</strong>
+                    <small>{{ comment.created_at|date:"F j, Y, g:i a" }}</small>
+                </div>
+                <div class="comment-content">
+                    <p>{{ comment.content }}</p>
+                </div>
+
+                <button class="reply-button" onclick="toggleReplyForm('reply-form-{{ comment.id }}')">Responder</button>
+
+                <!-- Formulario para responder -->
+                <div id="reply-form-{{ comment.id }}" class="reply-form" style="display: none;">
+                    <form method="POST" action="{% url 'add-comment' object.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+                        <textarea name="content" required placeholder="Escribe tu respuesta..."></textarea>
+                        <button type="submit">Enviar respuesta</button>
+                    </form>
+                </div>
+
+                <!-- Mostrar botón de eliminar si el usuario es el autor del comentario -->
+                {% if comment.author == user %}
+                    <form method="POST" action="{% url 'delete-comment' comment.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-sm" type="submit">Eliminar</button>
+                    </form>
+                {% endif %}
+
+                <!-- Mostrar respuestas -->
+                {% if comment.replies.exists %}
+                    <div class="replies">
+                        {% include "Spa/replies.html" with replies=comment.replies.all %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+<script>
+function toggleReplyForm(formId) {
+    var form = document.getElementById(formId);
+    if (form.style.display === "none") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
+}
+</script>
+{% endblock content %}

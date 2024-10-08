@@ -1,0 +1,17 @@
+{% extends "spa/base.html" %}
+
+{% block content %}
+    <h1>Mis Posts</h1>
+    {% if posts %}
+        <ul class="list-group">
+            {% for post in posts %}
+                <li class="list-group-item">
+                    <a href="{% url 'post-detail' post.id %}">{{ post.titulo }}</a>
+                    <small class="text-muted">{{ post.fecha_posteo }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tienes ningún post aún.</p>
+    {% endif %}
+{% endblock content %}

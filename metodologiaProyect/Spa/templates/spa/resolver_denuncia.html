@@ -1,0 +1,27 @@
+{% extends "spa/base.html" %}
+
+{% block content %}
+    <h2>Resolver Denuncia</h2>
+    <p>Post: {{ denuncia.post.titulo }}</p>
+    <p>Denunciante: {{ denuncia.denunciante.username }}</p>
+    <p>Motivo: {{ denuncia.motivo }}</p>
+    <p>Fecha de Denuncia: {{ denuncia.fecha_denuncia }}</p>
+
+    <form method="POST" action="{% url 'post-delete' denuncia.post.id %}">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Eliminar Post</button>
+    </form>
+    
+    <form method="POST" action="{% url 'denuncia-delete' denuncia.id %}">
+        {% csrf_token %}
+        <button class="btn btn-warning" type="submit">Eliminar Denuncia</button>
+    </form>
+
+    <form method="POST" action="{% url 'user-delete' denuncia.post.autor.id %}">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Eliminar Usuario</button>
+    </form>
+
+    <a href="{% url 'view-denuncias' %}" class="btn btn-secondary">Volver a Denuncias</a>
+{% endblock content %}
+

@@ -1,0 +1,33 @@
+{% extends "spa/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Blog post</legend>
+                {{ form|crispy }}
+
+                {% if form.instance.imagen %}  <!-- Cambié object a form.instance -->
+                    <div class="form-group">
+                        <img src="{{ form.instance.imagen.url }}" alt="Imagen del post" style="max-width: 100%; height: auto;">
+                        <a href="{% url 'remove-image' form.instance.pk %}" class="btn btn-danger mt-2">Eliminar imagen</a>
+                    </div>
+                {% endif %}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Guardar cambios</button>
+            </div>
+        </form>
+
+        <a href="{% url 'Inicio-Spa' %}">Cancelar</a>
+
+        {% if form.instance.pk %}  <!-- Verifica si el objeto ya tiene un pk -->
+            <form method="POST" action="{% url 'post-delete' form.instance.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-danger mt-2">Eliminar post</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock content %}

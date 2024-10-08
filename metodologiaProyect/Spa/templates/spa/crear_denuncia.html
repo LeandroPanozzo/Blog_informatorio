@@ -1,0 +1,23 @@
+{% extends "spa/base.html" %}  <!-- Hereda de base.html -->
+{% block content %}  <!-- Bloque de contenido que se puede reemplazar -->
+
+<div class="container mt-5"> <!-- Contenedor con margen superior -->
+    <div class="card shadow"> <!-- Tarjeta con sombra -->
+        <div class="card-header bg-steel text-white"> <!-- Cabecera de la tarjeta -->
+            <h5>Enviar Denuncia</h5>
+        </div>
+        <div class="card-body"> <!-- Cuerpo de la tarjeta -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="motivo" class="font-weight-bold">Motivo de la denuncia</label>
+                    <textarea id="motivo" name="motivo" class="form-control" rows="4" required placeholder="Escribe aquí el motivo de tu denuncia..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger btn-block">Enviar denuncia</button> <!-- Botón expandido -->
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}  <!-- Fin del bloque de contenido -->
+
